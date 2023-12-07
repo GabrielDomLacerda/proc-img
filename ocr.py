@@ -30,10 +30,26 @@ def processar_imagem(image, threshold=150, gaussian_size=3, gaussian_sigma=3, me
 def extrair_texto_imagem(image):
     custom_config = r'--oem 3 --psm 6'
     texto = pytesseract.image_to_string(image, config=custom_config)
-    return texto.replace('  ', ' ').replace('\n\n', '\n')
+    return texto
 
 # %%
-def processamento_final(file: str, threshold=150, gaussian_size=3, gaussian_sigma=3, median_size=1, invert=False, dilate_size=3, dilate_it=1, erode_size=3, erode_it=1):
+def processamento_texto(texto: str, limite_caracteres=3, remover_numeros=False, remover_especiais=False):
+    texto = texto.replace('  ', ' ').replace('\n\n', '\n').strip()
+
+    if (remover_numeros):
+        texto = ''.join(c for c in texto if not c.isdigit())
+
+    if (remover_especiais):
+        texto = ''.join(c for c in texto if c.isalnum() or c in ' \n')
+    
+    
+    texto = '\n'.join(list(filter(lambda x: len(x) >= limite_caracteres, map(lambda x: x.strip(), texto.split('\n')))))
+
+    return texto
+
+# %%
+def processamento_final(file: str, threshold=150, gaussian_size=3, gaussian_sigma=3, median_size=1, invert=False, dilate_size=3, dilate_it=1, erode_size=3, erode_it=1,
+                        limite_caracteres=3, remover_numeros=False, remover_especiais=False):
     img = cv2.imread(file, cv2.IMREAD_COLOR)
     _, axis = plt.subplots(1, 2)
     axis[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
@@ -41,7 +57,7 @@ def processamento_final(file: str, threshold=150, gaussian_size=3, gaussian_sigm
     img = processar_imagem(img, threshold, gaussian_size, gaussian_sigma, median_size, invert, dilate_size, dilate_it, erode_size, erode_it)
 
     axis[1].imshow(img, cmap='gray')
-    return extrair_texto_imagem(img)
+    return processamento_texto(extrair_texto_imagem(img), limite_caracteres, remover_numeros, remover_especiais)
 
 # %%
 print(processamento_final('imgs/texto.png'))
@@ -50,8 +66,10 @@ print(processamento_final('imgs/texto.png'))
 print(processamento_final('imgs/bh.png', threshold=200))
 
 # %%
-texto = processamento_final('imgs/senhor_dos_aneis.png', threshold=100, gaussian_sigma=1, gaussian_size=5, median_size=1, erode_size=3, dilate_size=1)
-print('\n'.join(list(filter(lambda x: len(x) > 3, texto.split('\n')))[-5:]))
+texto = processamento_final('imgs/senhor_dos_aneis.png', threshold=100, gaussian_sigma=1, gaussian_size=5, 
+                            median_size=1, erode_size=3, dilate_size=1, 
+                            limite_caracteres=3, remover_especiais=True, remover_numeros=True)
+print('\n'.join(texto.split('\n')[-5:]))
 
 # %%
 texto = processamento_final('imgs/fake_png_crianca.png', threshold=120, erode_size=5, erode_it=3, dilate_size=2, dilate_it=3)
