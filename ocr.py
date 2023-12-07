@@ -5,6 +5,9 @@ import cv2
 import pytesseract
 
 # %%
+pytesseract.pytesseract.tesseract_cmd = 'D:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+
+# %%
 def processar_imagem(image, threshold=150, gaussian_size=3, gaussian_sigma=3, median_size=1, invert=False, dilate_size=3, dilate_it=1, erode_size=3, erode_it=1):
     proc_img = image.copy()
     proc_img = cv2.cvtColor(proc_img, cv2.COLOR_BGR2GRAY)
@@ -66,13 +69,13 @@ print(processamento_final('imgs/texto.png'))
 print(processamento_final('imgs/bh.png', threshold=200))
 
 # %%
+texto = processamento_final('imgs/fake_png_crianca.png', threshold=120, erode_size=5, erode_it=3, dilate_size=2, dilate_it=3)
+print(texto)
+
+# %%
 texto = processamento_final('imgs/senhor_dos_aneis.png', threshold=100, gaussian_sigma=1, gaussian_size=5, 
                             median_size=1, erode_size=3, dilate_size=1, 
                             limite_caracteres=3, remover_especiais=True, remover_numeros=True)
 print('\n'.join(texto.split('\n')[-5:]))
-
-# %%
-texto = processamento_final('imgs/fake_png_crianca.png', threshold=120, erode_size=5, erode_it=3, dilate_size=2, dilate_it=3)
-print(texto)
 
 
